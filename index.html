@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Printers | ID Card Desk</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <aside class="sidebar">
+      <a class="brand" href="#"><span class="brand-mark">AI</span><span>AI Printers<small>ID Card Desk</small></span></a>
+      <nav>
+        <button class="nav-link active" data-page="dashboard"><span>▦</span>Dashboard</button>
+        <button class="nav-link" data-page="requests"><span>◫</span>All Requests <b id="requestCount">0</b></button>
+        <button class="nav-link" data-page="schools"><span>⌂</span>Schools</button>
+        <button class="nav-link" data-page="forms"><span>☷</span>Form Builder</button>
+      </nav>
+      <div class="sidebar-bottom"><span class="avatar">AP</span><div><strong>AI Printers</strong><small>Administrator</small></div></div>
+    </aside>
+    <main>
+      <header><button class="mobile-menu" aria-label="Open menu">☰</button><div><p class="eyebrow">WORKSPACE</p><h1 id="pageTitle">Good morning, AI Printers</h1></div><button class="button primary" id="newRequest">+ New request</button></header>
+
+      <section id="dashboard" class="page active">
+        <div class="stat-grid">
+          <article class="stat"><span class="stat-icon amber">◫</span><div><p>New requests</p><strong id="newTotal">0</strong><small>Waiting to be reviewed</small></div></article>
+          <article class="stat"><span class="stat-icon blue">✎</span><div><p>In design</p><strong id="designTotal">0</strong><small>Currently being designed</small></div></article>
+          <article class="stat"><span class="stat-icon green">✓</span><div><p>Ready / printed</p><strong id="readyTotal">0</strong><small>Completed this month</small></div></article>
+          <article class="stat"><span class="stat-icon purple">⌂</span><div><p>Active schools</p><strong id="schoolTotal">0</strong><small>With customized forms</small></div></article>
+        </div>
+        <div class="panel recent-panel"><div class="panel-heading"><div><h2>Recent requests</h2><p>Latest student ID card work</p></div><button class="text-button" data-go="requests">View all →</button></div><div class="table-wrap"><table><thead><tr><th>Student</th><th>School</th><th>Request</th><th>Submitted</th><th>Status</th><th></th></tr></thead><tbody id="recentRows"></tbody></table></div></div>
+      </section>
+
+      <section id="requests" class="page">
+        <div class="section-intro"><div><h2>All requests</h2><p>Track every ID card request in one place.</p></div><button class="button primary" id="newRequest2">+ New request</button></div>
+        <div class="filters"><label class="search">⌕ <input id="searchRequests" placeholder="Search student, school, or ID..." /></label><select id="statusFilter"><option value="">All statuses</option><option>Received</option><option>In Design</option><option>Sent for Approval</option><option>Approved</option><option>Printed</option><option>Delivered</option></select><select id="schoolFilter"><option value="">All schools</option></select></div>
+        <div class="panel"><div class="table-wrap"><table><thead><tr><th>Request ID</th><th>Student</th><th>School</th><th>Type</th><th>Submitted</th><th>Status</th><th>Update</th></tr></thead><tbody id="requestRows"></tbody></table></div></div>
+      </section>
+
+      <section id="schools" class="page">
+        <div class="section-intro"><div><h2>Schools</h2><p>Create a private workspace and form for each school.</p></div><button class="button primary" id="addSchool">+ Add school</button></div><div id="schoolCards" class="school-grid"></div>
+      </section>
+
+      <section id="forms" class="page">
+        <div class="section-intro"><div><h2>Form builder</h2><p>Control exactly what each school sees when it requests an ID card.</p></div></div>
+        <div class="builder-layout"><div class="panel builder-controls"><label>School<select id="builderSchool"></select></label><div class="form-fields" id="formFields"></div><button class="button outline" id="addField">+ Add field</button><button class="button primary full" id="saveForm">Save form changes</button></div><div class="preview"><p class="eyebrow">TEACHER VIEW</p><div class="phone"><div class="phone-top"><span>9:41</span><span>● ● ●</span></div><h3 id="previewSchool">School request</h3><p>Request a student ID card</p><div id="formPreview"></div><button class="button primary full">Submit request</button></div></div></div>
+      </section>
+    </main>
+
+    <dialog id="requestDialog"><form method="dialog" id="requestForm" class="modal"><div class="modal-head"><div><p class="eyebrow">NEW JOB</p><h2>Create ID-card request</h2></div><button class="close" value="cancel">×</button></div><label>School<select name="school" id="requestSchool" required></select></label><div id="dynamicFields" class="dynamic-fields"></div><label>Student photograph<input name="photo" type="file" accept="image/*" /></label><label>Notes (optional)<textarea name="notes" rows="2" placeholder="Any special instruction for the card"></textarea></label><div class="modal-actions"><button class="button outline" value="cancel">Cancel</button><button class="button primary" value="default">Save request</button></div></form></dialog>
+    <dialog id="schoolDialog"><form method="dialog" id="schoolForm" class="modal"><div class="modal-head"><div><p class="eyebrow" id="schoolDialogLabel">NEW SCHOOL</p><h2 id="schoolDialogTitle">Add school</h2></div><button class="close" value="cancel">×</button></div><label>School name<input name="schoolName" required placeholder="e.g. Green Valley School" /></label><label>Contact person (optional)<input name="contact" placeholder="Teacher or school office" /></label><label>Private access code<input name="accessCode" placeholder="e.g. GVS-2026" /></label><p class="hint">The access code will later create a private request link for this school.</p><div class="modal-actions"><button class="button outline" value="cancel">Cancel</button><button class="button primary" value="default" id="schoolSaveButton">Add school</button></div></form></dialog>
+    <dialog id="linkDialog"><div class="modal"><div class="modal-head"><div><p class="eyebrow">TEACHER ACCESS</p><h2 id="linkSchoolName">Request form link</h2></div><button class="close" id="closeLink">×</button></div><p class="hint">Once the website is online, send this private link to the teachers of this school through WhatsApp. They will use it to submit ID-card requests.</p><label>Private form link<input id="teacherLink" readonly /></label><button class="button primary full" id="copyLink">Copy link</button><p class="hint">This is a preview link. It will work after the website is published online.</p></div></dialog>
+    <script src="app.js"></script>
+  </body>
+</html>
