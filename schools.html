@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Select your school | Ai Printers</title><link rel="stylesheet" href="styles.css"><style>
+body{min-height:100vh;padding:40px 20px;display:flex;justify-content:center}
+.wrap{width:min(600px,100%)}
+.wrap h1{font-size:26px;margin-bottom:6px}
+.wrap p{color:#748094;font-size:14px;margin-bottom:20px}
+#search{width:100%;padding:12px;border:1px solid #dce2eb;border-radius:8px;font:14px "DM Sans";margin-bottom:18px}
+.school-card{display:block;width:100%;text-align:left;background:#fff;border:1px solid #e8ecf2;border-radius:10px;padding:16px 18px;margin-bottom:10px;text-decoration:none;color:#16213b;font:600 15px "DM Sans";cursor:pointer}
+.school-card:hover{border-color:#316bff}
+#codeStep{display:none}
+#codeStep input{width:100%;padding:12px;border:1px solid #dce2eb;border-radius:8px;font:14px "DM Sans";margin:14px 0}
+.error-msg{color:#bf3e3e;font-size:13px;margin-top:-6px;margin-bottom:10px}
+.back-link{background:none;border:0;color:#748094;font:600 13px "DM Sans";cursor:pointer;margin-bottom:14px}
+</style></head>
+<body><div class="wrap">
+<div id="listStep">
+<h1>Select your school</h1><p>Choose your school to submit an ID card request.</p>
+<input id="search" placeholder="Search school name...">
+<div id="list"><p class="hint">Loading schools…</p></div>
+</div>
+<div id="codeStep">
+<button class="back-link" id="backBtn">← Back to school list</button>
+<h1 id="selectedName"></h1>
+<p>Enter the school code your office gave you to continue.</p>
+<input id="codeInput" placeholder="Enter school code">
+<p id="codeError" class="error-msg" hidden>Incorrect code. Please check with your school office.</p>
+<button class="button primary full" id="continueBtn">Continue</button>
+</div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const sb=window.supabase.createClient('https://yceukuehpffktbpengfx.supabase.co','sb_publishable_-8xFlxnjkipxyDihmKphzg_iTveTcqC');
+let all=[];let selected=null;
+async function load(){let {data,error}=await sb.from('schools').select('name,access_code').order('name');if(error){document.getElementById('list').innerHTML='<p>Could not load schools.</p>';return}all=data;render(data)}
+function render(list){document.getElementById('list').innerHTML=list.map(s=>`<button type="button" class="school-card" data-code="${s.access_code}">${s.name}</button>`).join('')||'<p class="hint">No schools found.</p>';document.querySelectorAll('.school-card').forEach(b=>b.onclick=()=>openCode(b.dataset.code))}
+function openCode(code){selected=all.find(s=>s.access_code===code);document.getElementById('listStep').style.display='none';document.getElementById('codeStep').style.display='block';document.getElementById('selectedName').textContent=selected.name;document.getElementById('codeInput').value='';document.getElementById('codeError').hidden=true}
+document.getElementById('backBtn').onclick=()=>{document.getElementById('codeStep').style.display='none';document.getElementById('listStep').style.display='block'};
+document.getElementById('continueBtn').onclick=()=>{let entered=document.getElementById('codeInput').value.trim();if(entered.toUpperCase()===selected.access_code.toUpperCase()){location.href=`teacher.html?school=${encodeURIComponent(selected.access_code)}`}else{document.getElementById('codeError').hidden=false}};
+document.getElementById('search').oninput=e=>{let q=e.target.value.toLowerCase();render(all.filter(s=>s.name.toLowerCase().includes(q)))};
+load();
+</script>
+</body></html>
