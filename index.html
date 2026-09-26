@@ -73,29 +73,18 @@ footer a{color:#aab3c9;text-decoration:none;font-size:13px}
     <span class="pill">PRINT · DESIGN · CREATE · CUSTOMISE</span>
     <h1>Your <span class="c1">One-Stop Solution</span> for Printing & <span class="c2">Digital Services</span></h1>
     <p style="margin-left:auto;margin-right:auto">High-quality printing, creative designs and customised products for schools, businesses and personal needs.</p>
-    <div class="cta" style="justify-content:center"><a href="#services" class="btn btn-primary">Get Started</a><a href="https://wa.me/917020655113" target="_blank" class="btn btn-wa">💬 Chat on WhatsApp</a></div>
   </div>
 </section>
 
 <section class="section" id="services">
   <div class="section-head"><span class="tag">WHAT WE OFFER</span><h2>Our Services</h2></div>
-  <div class="svc-grid" id="svcGrid">
-    <a class="svc" style="border-color:#c9d6ff" href="/schools.html"><div class="ic" style="background:#e8efff;color:var(--blue)">🖨️</div><h4>Printing</h4><span class="badge-tag badge-live">Live</span></a>
-    <a class="svc" data-msg="Designing" href="#"><div class="ic" style="background:#fdeaf2;color:var(--magenta)">🎨</div><h4>Designing</h4></a>
-    <a class="svc" data-msg="3D Printing" href="#"><div class="ic" style="background:#fff6da;color:#c98a00">🧊</div><h4>3D Printing</h4></a>
-    <a class="svc" data-msg="Cricut Cutting" href="#"><div class="ic" style="background:#e3f7ec;color:#18905e">✂️</div><h4>Cricut Cutting</h4></a>
-    <a class="svc" data-msg="Sublimation" href="#"><div class="ic" style="background:#e8efff;color:var(--blue)">☕</div><h4>Sublimation</h4></a>
-    <a class="svc" data-msg="Trophies" href="#"><div class="ic" style="background:#fff6da;color:#c98a00">🏆</div><h4>Trophies</h4></a>
-    <a class="svc" data-msg="Stationery" href="#"><div class="ic" style="background:#fdeaf2;color:var(--magenta)">📓</div><h4>Stationery</h4></a>
-    <a class="svc" data-msg="Custom Gifts" href="#"><div class="ic" style="background:#e3f7ec;color:#18905e">🎁</div><h4>Custom Gifts</h4></a>
-    <a class="svc" data-msg="Frames" href="#"><div class="ic" style="background:#e8efff;color:var(--blue)">🖼️</div><h4>Frames</h4></a>
-  </div>
+  <div class="svc-grid" id="svcGrid"><p class="hint">Loading services…</p></div>
 </section>
 
 <section class="section" id="tools">
   <div class="tools-box">
     <span class="tag" style="color:var(--blue);font:700 11px DM Sans;letter-spacing:1.5px">CUSTOMER TOOLS</span>
-    <h2 style="margin:6px 0 0">Create and customise your items easily</h2>
+    <h2 style="margin:6px 0 0">Customer Tools</h2>
     <div class="tools-grid">
       <a href="/schools.html" class="tool live"><h4>🪪 ID Card Manager</h4><p>Create student & staff ID cards</p><span class="badge-tag badge-live">Live</span></a>
       <div class="tool"><h4>📜 Certificate Maker</h4><p>Design certificates easily</p><span class="badge-tag badge-soon">Soon</span></div>
@@ -130,9 +119,16 @@ footer a{color:#aab3c9;text-decoration:none;font-size:13px}
   <div class="copyright">© 2026 Ai Printers — Awesome Imagination. All rights reserved.</div>
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+const sb=window.supabase.createClient('https://yceukuehpffktbpengfx.supabase.co','sb_publishable_-8xFlxnjkipxyDihmKphzg_iTveTcqC');
+let servicesAll=[];
+async function loadServices(){let {data,error}=await sb.from('services').select('*').order('created_at');if(error||!data||!data.length){document.getElementById('svcGrid').innerHTML='<p class="hint">No services added yet.</p>';return}
+servicesAll=data;
+document.getElementById('svcGrid').innerHTML=data.map(s=>`<a class="svc" href="catalog.html?service=${s.id}"><div class="ic" style="background:#eef1fb;color:var(--blue)">${s.icon||'🖨️'}</div><h4>${s.name}</h4></a>`).join('');
+}
+loadServices();
 document.getElementById('searchToggle').onclick=()=>document.getElementById('searchBox').classList.toggle('open');
 document.getElementById('svcSearch').oninput=e=>{let q=e.target.value.toLowerCase();document.querySelectorAll('#svcGrid .svc').forEach(c=>{c.style.display=c.querySelector('h4').textContent.toLowerCase().includes(q)?'':'none'})};
-document.querySelectorAll('.svc[data-msg]').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();window.open('https://wa.me/917020655113?text='+encodeURIComponent('Hi, I am interested in your '+a.dataset.msg+' service.'),'_blank')}));
 </script>
 </body></html>
