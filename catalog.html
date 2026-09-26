@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Catalog | Ai Printers</title><link rel="stylesheet" href="styles.css">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#131c30;--muted:#5b6779;--line:#e8ecf2;--blue:#1f6fd6;--magenta:#e6197f;--bg:#fafbfd}
+body{margin:0;font-family:"DM Sans",sans-serif;color:var(--ink);background:var(--bg);padding:0}
+header{display:flex;align-items:center;gap:12px;padding:16px 5%;background:#fff;border-bottom:1px solid var(--line)}
+header img{height:36px}header b{font:700 14px Outfit;color:var(--magenta)}
+.wrap{max-width:1100px;margin:auto;padding:30px 5%}
+.back{color:var(--blue);text-decoration:none;font:600 13px "DM Sans";display:inline-block;margin-bottom:14px}
+h1{font:700 26px Outfit;margin:0 0 22px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:18px}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:0 4px 14px #13203008}
+.card img{width:100%;height:160px;object-fit:cover;background:#f0f2f6}
+.card .body{padding:14px}
+.card h3{font:600 14px Outfit;margin:0 0 6px}
+.card p{font-size:12.5px;color:var(--muted);margin:0 0 8px;line-height:1.5}
+.rate{font:700 15px Outfit;color:var(--blue)}
+</style></head>
+<body>
+<header><img src="logo.png" alt=""><b>Ai Printers</b></header>
+<div class="wrap">
+  <a href="/" class="back">← Back to home</a>
+  <h1 id="svcName">Loading…</h1>
+  <div class="grid" id="grid"></div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const sb=window.supabase.createClient('https://yceukuehpffktbpengfx.supabase.co','sb_publishable_-8xFlxnjkipxyDihmKphzg_iTveTcqC');
+const serviceId=new URLSearchParams(location.search).get('service');
+async function load(){
+  if(!serviceId){document.getElementById('svcName').textContent='Category not found';return}
+  let {data:svc}=await sb.from('services').select('*').eq('id',serviceId).maybeSingle();
+  document.getElementById('svcName').textContent=svc?svc.name:'Category not found';
+  let {data:products,error}=await sb.from('products').select('*').eq('service_id',serviceId).order('created_at');
+  if(error||!products||!products.length){document.getElementById('grid').innerHTML='<p class="hint">No products added yet in this category.</p>';return}
+  document.getElementById('grid').innerHTML=products.map(p=>{
+    let img=p.photo_path?sb.storage.from('product-photos').getPublicUrl(p.photo_path).data.publicUrl:'';
+    return `<div class="card">${img?`<img src="${img}" alt="${p.title}">`:'<div style="height:160px;background:#f0f2f6;display:grid;place-items:center;color:#98a1b0;font-size:12px">No photo</div>'}<div class="body"><h3>${p.title}</h3>${p.description?`<p>${p.description}</p>`:''}${p.rate?`<div class="rate">₹${p.rate}</div>`:''}</div></div>`;
+  }).join('');
+}
+load();
+</script>
+</body></html>
