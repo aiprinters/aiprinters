@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Photo Studio | Ai Printers</title><link rel="stylesheet" href="styles.css">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#131c30;--muted:#5b6779;--line:#e8ecf2;--blue:#1f6fd6}
+body{margin:0;font-family:"DM Sans",sans-serif;color:var(--ink);background:#f5f7fb;min-height:100vh}
+header{display:flex;align-items:center;gap:10px;padding:16px 5%;background:#fff;border-bottom:1px solid var(--line)}
+header img{height:34px}header b{font:700 14px Outfit}
+.wrap{max-width:640px;margin:auto;padding:30px 5%;text-align:center}
+h1{font:700 24px Outfit;margin:6px 0}
+p.sub{color:var(--muted);font-size:14px;margin:0 0 24px}
+.dropzone{border:2px dashed #c9d6ff;border-radius:16px;padding:50px 20px;background:#fff;cursor:pointer}
+.dropzone .ic{font-size:40px;margin-bottom:10px}
+.dropzone b{display:block;font-size:15px}
+.dropzone small{color:var(--muted);font-size:12px}
+#fileInput{display:none}
+.stage{display:none}.stage.active{display:block}
+.editor-box{background:#fff;border-radius:16px;padding:20px;box-shadow:0 8px 24px #13203010;margin-top:20px}
+#editorCanvas,#bgPreviewCanvas{max-width:100%;max-height:52vh;display:block;border:1px solid #ddd;border-radius:8px;touch-action:none;margin:14px auto}
+.adj-row{display:grid;gap:6px;margin-top:12px;text-align:left}
+.adj-row label{font-size:11px;font-weight:600;color:var(--muted);display:grid;gap:3px}
+.editor-actions{display:flex;gap:8px;margin-top:16px;justify-content:center;flex-wrap:wrap}
+.bg-opts{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:12px}
+.bg-opt{width:44px;height:44px;border-radius:8px;border:2px solid #dce2eb;cursor:pointer}
+.bg-opt.selected{border-color:var(--blue)}
+.bg-status{font-size:12px;color:var(--muted);margin-top:8px}
+a.back{color:var(--blue);text-decoration:none;font:600 13px "DM Sans";display:inline-block;margin-bottom:14px}
+</style></head>
+<body>
+<header><img src="logo.png" alt=""><b>Ai Printers</b></header>
+<div class="wrap">
+<a href="/" class="back">← Back to home</a>
+<h1>Photo Studio</h1>
+<p class="sub">Straighten, adjust and change the background of any photo — free, right in your browser.</p>
+
+<div class="stage active" id="stageUpload">
+  <div class="dropzone" id="dropzone"><div class="ic">📷</div><b>Tap to choose a photo</b><small>JPG or PNG</small></div>
+  <input type="file" id="fileInput" accept="image/*">
+</div>
+
+<div class="stage" id="stage1">
+  <div class="editor-box">
+    <h3 style="margin:0 0 6px">Adjust photo</h3>
+    <p style="font-size:12px;color:var(--muted);margin:0">Drag the 4 corner dots to match the edges, then adjust brightness if needed.</p>
+    <canvas id="editorCanvas"></canvas>
+    <div class="adj-row">
+      <label>Brightness<input type="range" id="adjBrightness" min="50" max="150" value="100"></label>
+      <label>Contrast<input type="range" id="adjContrast" min="50" max="150" value="100"></label>
+      <label>Saturation<input type="range" id="adjSaturate" min="0" max="200" value="100"></label>
+    </div>
+    <div class="editor-actions">
+      <button type="button" class="button outline" id="resetCorners">Reset corners</button>
+      <button type="button" class="button outline" id="startOver1">Start over</button>
+      <button type="button" class="button primary" id="nextToBg">Next: Background →</button>
+    </div>
+  </div>
+</div>
+
+<div class="stage" id="stage2">
+  <div class="editor-box">
+    <h3 style="margin:0 0 6px">Background (optional)</h3>
+    <p style="font-size:12px;color:var(--muted);margin:0">Pick a background, or keep the original.</p>
+    <canvas id="bgPreviewCanvas"></canvas>
+    <div class="bg-opts">
+      <div class="bg-opt selected" data-bg="none" style="background:repeating-conic-gradient(#eee 0% 25%,#fff 0% 50%) 0/12px 12px"></div>
+      <div class="bg-opt" data-bg="white" style="background:#fff"></div>
+      <div class="bg-opt" data-bg="blue" style="background:#2d5fa8"></div>
+      <div class="bg-opt" data-bg="red" style="background:#b83a3a"></div>
+      <div class="bg-opt" data-bg="transparent" style="background:repeating-conic-gradient(#ccc 0% 25%,#fff 0% 50%) 0/8px 8px"></div>
+    </div>
+    <p class="bg-status" id="bgStatus"></p>
+    <div class="editor-actions">
+      <button type="button" class="button outline" id="backToStage1">← Back</button>
+      <button type="button" class="button outline" id="startOver2">Start over</button>
+      <a class="button primary" id="downloadBtn" download="photo-studio-result.png">Download photo</a>
+    </div>
+  </div>
+</div>
+
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/selfie_segmentation.js" crossorigin="anonymous"></script>
+<script src="photo-studio.js"></script>
+</body></html>
