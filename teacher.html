@@ -1,3 +1,62 @@
 <!doctype html>
-<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>AI Printers | ID Card Request</title><link rel="stylesheet" href="styles.css"><style>body{min-height:100vh;display:grid;place-items:center;padding:24px}.teacher-card{width:min(620px,100%);background:#fff;border:1px solid #e8ecf2;border-radius:16px;padding:32px;box-shadow:0 16px 40px #26324912}.teacher-brand{display:flex;align-items:center;gap:10px;margin-bottom:30px}.teacher-brand strong{font:600 18px Outfit}.teacher-brand span{background:#316bff;color:#fff;border-radius:9px;padding:10px;font-weight:700}.teacher-card h1{font-size:27px}.teacher-card p{color:#748094;font-size:14px;line-height:1.5}.teacher-form label{display:grid;gap:7px;font-size:12px;font-weight:600;color:#526075;margin:15px 0}.teacher-form input,.teacher-form select,.teacher-form textarea{border:1px solid #dce2eb;border-radius:7px;padding:11px;font:14px "DM Sans";width:100%}.teacher-form textarea{resize:vertical}.notice{padding:12px;border-radius:8px;background:#e2f7ed;color:#18875a;font-size:13px}.error{background:#fff0ef;color:#bf3e3e}</style></head>
-<body><section class="teacher-card"><div class="teacher-brand"><span>AI</span><strong>AI Printers</strong></div><div id="loading"><h1>Loading request form…</h1><p>Please wait a moment.</p></div><div id="formArea" hidden><p class="eyebrow">ID CARD REQUEST</p><h1 id="schoolName"></h1><p>Submit a new request or request a replacement. AI Printers will update the status after receiving it.</p><form class="teacher-form" id="teacherForm"><div id="fields"></div><label>Request type *<select name="request_type" required><option>New admission</option><option>Lost card</option><option>Damaged card</option><option>Correction</option></select></label><label>Student photograph *<input type="file" id="photo" accept="image/*" required></label><label>Notes (optional)<textarea id="notes" rows="3" placeholder="Any special instruction for the ID card"></textarea></label><label>Class Teacher name *<input id="teacherName" required></label><button class="button primary full" id="submit">Submit request</button></form><div id="message" hidden></div></div></section><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="teacher.js"></script></body></html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>AI Printers | ID Card Request</title><link rel="stylesheet" href="styles.css"><style>body{min-height:100vh;display:grid;place-items:center;padding:24px}.teacher-card{width:min(620px,100%);background:#fff;border:1px solid #e8ecf2;border-radius:16px;padding:32px;box-shadow:0 16px 40px #26324912}.teacher-brand{display:flex;align-items:center;gap:10px;margin-bottom:30px}.teacher-brand strong{font:600 18px Outfit}.teacher-brand span{background:#316bff;color:#fff;border-radius:9px;padding:10px;font-weight:700}.teacher-card h1{font-size:27px}.teacher-card p{color:#748094;font-size:14px;line-height:1.5}.teacher-form label{display:grid;gap:7px;font-size:12px;font-weight:600;color:#526075;margin:15px 0}.teacher-form input,.teacher-form select,.teacher-form textarea{border:1px solid #dce2eb;border-radius:7px;padding:11px;font:14px "DM Sans";width:100%}.teacher-form textarea{resize:vertical}.notice{padding:12px;border-radius:8px;background:#e2f7ed;color:#18875a;font-size:13px}.error{background:#fff0ef;color:#bf3e3e}
+#photoEditorOverlay{display:none;position:fixed;inset:0;background:#000c;z-index:999;align-items:center;justify-content:center;padding:14px}
+#photoEditorOverlay.open{display:flex}
+.editor-box{background:#fff;border-radius:14px;padding:16px;max-width:96vw;max-height:96vh;overflow:auto;width:520px}
+.editor-box h3{margin:0 0 6px;font-size:16px}
+.editor-box .hint2{font-size:12px;color:#748094;margin:0 0 10px}
+#editorCanvas,#bgPreviewCanvas{max-width:100%;max-height:48vh;display:block;border:1px solid #ddd;border-radius:8px;touch-action:none;margin:auto}
+.adj-row{display:grid;gap:6px;margin-top:12px}
+.adj-row label{font-size:11px;font-weight:600;color:#526075;display:grid;gap:3px}
+.editor-actions{display:flex;gap:8px;margin-top:14px;justify-content:flex-end;flex-wrap:wrap}
+#photoPreviewWrap{display:none;margin-top:6px;align-items:center;gap:10px}
+#photoPreviewWrap img{max-width:110px;border-radius:8px;border:1px solid #dce2eb}
+.bg-opts{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.bg-opt{width:44px;height:44px;border-radius:8px;border:2px solid #dce2eb;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:10px;color:#748094}
+.bg-opt.selected{border-color:#316bff}
+.stage{display:none}.stage.active{display:block}
+.bg-status{font-size:12px;color:#748094;margin-top:8px}
+</style></head>
+<body><section class="teacher-card"><div class="teacher-brand"><span>AI</span><strong>AI Printers</strong></div><div id="loading"><h1>Loading request form…</h1><p>Please wait a moment.</p></div><div id="formArea" hidden><p class="eyebrow">ID CARD REQUEST</p><h1 id="schoolName"></h1><p>Submit a new request or request a replacement. AI Printers will update the status after receiving it.</p><form class="teacher-form" id="teacherForm"><div id="fields"></div><label>Request type *<select name="request_type" required><option>New admission</option><option>Lost card</option><option>Damaged card</option><option>Correction</option></select></label>
+<label>Student photograph *<input type="file" id="photo" accept="image/*" required></label>
+<div id="photoPreviewWrap"><img id="photoPreview" alt="Preview"><button type="button" class="button outline" id="reeditPhoto">Re-adjust photo</button></div>
+<label>Notes *<textarea id="notes" rows="3" required placeholder="Any special instruction for the ID card"></textarea></label><label>Class Teacher name *<input id="teacherName" required></label><button class="button primary full" id="submit">Submit request</button></form><div id="message" hidden></div></div></section>
+
+<div id="photoEditorOverlay"><div class="editor-box">
+  <div class="stage active" id="stage1">
+    <h3>Adjust photo</h3>
+    <p class="hint2">Drag the 4 corner dots to match the photo/document's edges, then adjust brightness if needed.</p>
+    <canvas id="editorCanvas"></canvas>
+    <div class="adj-row">
+      <label>Brightness<input type="range" id="adjBrightness" min="50" max="150" value="100"></label>
+      <label>Contrast<input type="range" id="adjContrast" min="50" max="150" value="100"></label>
+      <label>Saturation<input type="range" id="adjSaturate" min="0" max="200" value="100"></label>
+    </div>
+    <div class="editor-actions">
+      <button type="button" class="button outline" id="resetCorners">Reset corners</button>
+      <button type="button" class="button outline" id="cancelEdit">Cancel</button>
+      <button type="button" class="button primary" id="nextToBg">Next: Background →</button>
+    </div>
+  </div>
+  <div class="stage" id="stage2">
+    <h3>Background (optional)</h3>
+    <p class="hint2">Pick a background for the photo, or keep the original.</p>
+    <canvas id="bgPreviewCanvas"></canvas>
+    <div class="bg-opts">
+      <div class="bg-opt selected" data-bg="none" style="background:repeating-conic-gradient(#eee 0% 25%,#fff 0% 50%) 0/12px 12px">Orig</div>
+      <div class="bg-opt" data-bg="white" style="background:#fff">White</div>
+      <div class="bg-opt" data-bg="blue" style="background:#2d5fa8;color:#fff">Blue</div>
+      <div class="bg-opt" data-bg="red" style="background:#b83a3a;color:#fff">Red</div>
+      <div class="bg-opt" data-bg="transparent" style="background:repeating-conic-gradient(#ccc 0% 25%,#fff 0% 50%) 0/8px 8px">None</div>
+    </div>
+    <p class="bg-status" id="bgStatus"></p>
+    <div class="editor-actions">
+      <button type="button" class="button outline" id="backToStage1">← Back</button>
+      <button type="button" class="button primary" id="applyEdit">Use this photo</button>
+    </div>
+  </div>
+</div></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/selfie_segmentation.js" crossorigin="anonymous"></script>
+<script src="teacher.js"></script></body></html>
