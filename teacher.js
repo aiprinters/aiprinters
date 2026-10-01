@@ -56,6 +56,9 @@ editorCanvas.addEventListener('pointermove',e=>{if(dragIndex<0)return;let [x,y]=
 window.addEventListener('pointerup',()=>{dragIndex=-1});
 ['adjBrightness','adjContrast','adjSaturate'].forEach(id=>document.getElementById(id).addEventListener('input',redraw));
 document.getElementById('resetCorners').onclick=()=>{corners=defaultCorners();redraw()};
+function rotateSource(sign){let newW=ch,newH=cw;let rc=document.createElement('canvas');rc.width=newW;rc.height=newH;let rctx=rc.getContext('2d');rctx.translate(newW/2,newH/2);rctx.rotate(sign*Math.PI/2);rctx.drawImage(sourceImg,-cw/2,-ch/2,cw,ch);sourceImg=rc;cw=newW;ch=newH;editorCanvas.width=cw;editorCanvas.height=ch;corners=defaultCorners();redraw()}
+document.getElementById('rotateLeft').onclick=()=>rotateSource(-1);
+document.getElementById('rotateRight').onclick=()=>rotateSource(1);
 document.getElementById('cancelEdit').onclick=()=>{closeEditor();if(!processedPhotoBlob)document.getElementById('photo').value=''};
 
 function computeWarpedCanvas(){
@@ -89,7 +92,7 @@ document.getElementById('bgStatus').textContent='';
 drawToPreview(warpedCanvas)};
 document.getElementById('backToStage1').onclick=()=>{document.getElementById('stage2').classList.remove('active');document.getElementById('stage1').classList.add('active')};
 
-function getSegmentation(){if(!selfieSeg){selfieSeg=new SelfieSegmentation({locateFile:(file)=>`https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/${file}`});selfieSeg.setOptions({modelSelection:1})}return selfieSeg}
+function getSegmentation(){if(!selfieSeg){selfieSeg=new SelfieSegmentation({locateFile:(file)=>`https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/${file}`});selfieSeg.setOptions({modelSelection:0})}return selfieSeg}
 function segmentImage(canvas){return new Promise((resolve,reject)=>{try{let seg=getSegmentation();seg.onResults(r=>resolve(r.segmentationMask));seg.send({image:canvas})}catch(e){reject(e)}})}
 function maskToAlphaCanvas(maskImg,w,h){let c=document.createElement('canvas');c.width=w;c.height=h;let ctx=c.getContext('2d');ctx.drawImage(maskImg,0,0,w,h);let id=ctx.getImageData(0,0,w,h);for(let i=0;i<id.data.length;i+=4){let v=id.data[i];id.data[i]=0;id.data[i+1]=0;id.data[i+2]=0;id.data[i+3]=v}ctx.putImageData(id,0,0);return c}
 
