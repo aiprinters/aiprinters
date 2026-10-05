@@ -637,7 +637,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onNavigateHome }) => {
                 <input
                   type="password"
                   autoFocus
-                  placeholder="Enter passcode (e.g. aradmin2026)"
+                  placeholder="Enter manager passcode"
                   value={adminPin}
                   onChange={(e) => setAdminPin(e.target.value)}
                   className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold focus:outline-none focus:border-[#1f6fd6]"
@@ -686,7 +686,6 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onNavigateHome }) => {
             <button onClick={onNavigateHome} className="hover:underline font-semibold">
               ← Return to Storefront
             </button>
-            <span className="text-[11px] text-slate-400">PIN: aradmin2026</span>
           </div>
         </div>
       ) : (
