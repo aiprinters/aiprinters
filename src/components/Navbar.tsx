@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Logo } from './Logo';
-import { Search, MessageSquare, X, Menu, Shield, Sparkles, Radio } from 'lucide-react';
+import { Search, MessageSquare, X, Menu, Sparkles, Radio } from 'lucide-react';
 
 interface NavbarProps {
   currentView: string;
@@ -113,21 +113,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, onNavigate, onSearc
               </button>
             )}
 
-            {/* Direct Admin Access Button */}
-            <button
-              type="button"
-              onClick={() => onNavigate('admin')}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-bold transition-all shadow-sm ${
-                currentView === 'admin'
-                  ? 'bg-slate-900 text-white border-slate-900 shadow-slate-900/20'
-                  : 'border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 hover:text-slate-900 hover:border-slate-300'
-              }`}
-              title="Admin Panel & Live Pricing Control"
-            >
-              <Shield className="w-3.5 h-3.5 text-[#1f6fd6]" />
-              <span className="hidden sm:inline">Admin Panel</span>
-              <span className="sm:hidden">Admin</span>
-            </button>
+
 
             {/* WhatsApp Direct Chat */}
             <a
@@ -191,13 +177,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, onNavigate, onSearc
             >
               <span>📐 Print Price Calculator</span>
             </button>
-            <button
-              onClick={() => { onNavigate('admin'); setMobileMenuOpen(false); }}
-              className="w-full text-left px-3 py-2 text-sm font-semibold rounded-lg bg-blue-50/60 hover:bg-blue-100/60 text-[#1f6fd6] flex items-center gap-2"
-            >
-              <Shield className="w-4 h-4 text-[#1f6fd6]" />
-              <span>Admin Portal & Pricing Control</span>
-            </button>
+
             <a
               href="https://wa.me/917020655113?text=Hi%20Ai%20Printers%2C%20I%20would%20like%20to%20place%20an%20order%20or%20inquire%20about%20my%20print%20job."
               target="_blank"

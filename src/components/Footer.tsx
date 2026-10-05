@@ -1,12 +1,30 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { Logo } from './Logo';
-import { Phone, Mail, Instagram, MessageSquare, ArrowUpRight, Shield } from 'lucide-react';
+import { Phone, Mail, Instagram, MessageSquare, ArrowUpRight } from 'lucide-react';
 
 interface FooterProps {
   onNavigate: (view: string, param?: string) => void;
 }
 
 export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
+  const clickCountRef = useRef(0);
+  const clickTimerRef = useRef<any>(null);
+
+  // Hidden easter-egg: 3 quick clicks/taps on the copyright text opens Admin login
+  const handleSecretAdminTrigger = () => {
+    clickCountRef.current += 1;
+    if (clickTimerRef.current) clearTimeout(clickTimerRef.current);
+
+    if (clickCountRef.current >= 3) {
+      clickCountRef.current = 0;
+      onNavigate('admin');
+    } else {
+      clickTimerRef.current = setTimeout(() => {
+        clickCountRef.current = 0;
+      }, 900);
+    }
+  };
+
   return (
     <footer className="bg-[#131c30] text-slate-300 pt-16 pb-12 border-t border-slate-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -79,15 +97,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                   Print Price Calculator
                 </button>
               </li>
-              <li>
-                <button
-                  onClick={() => onNavigate('admin')}
-                  className="hover:text-amber-300 transition-colors flex items-center gap-1.5 text-amber-400 font-semibold pt-1 border-t border-slate-800"
-                >
-                  <Shield className="w-3.5 h-3.5 text-amber-400" />
-                  <span>Admin Portal (Staff Login)</span>
-                </button>
-              </li>
+
               <li>
                 <a
                   href="https://wa.me/917020655113?text=Hi%20Ai%20Printers%2C%20I%20would%20like%20to%20check%20the%20status%20of%20my%20order."
@@ -175,7 +185,13 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
 
         {/* Bottom Copyright */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
-          <p>© 2026 Ai Printers — Awesome Imagination. All rights reserved.</p>
+          <p
+            onClick={handleSecretAdminTrigger}
+            className="cursor-default select-none active:opacity-75 transition-opacity"
+            title=""
+          >
+            © 2026 Ai Printers — Awesome Imagination. All rights reserved.
+          </p>
           <span>Commercial Printing & Institutional ID Solutions</span>
         </div>
       </div>

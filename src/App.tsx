@@ -26,30 +26,43 @@ export default function App() {
   const [isFabHovered, setIsFabHovered] = useState<boolean>(false);
 
   useEffect(() => {
-    // Check URL parameters on mount
-    const params = new URLSearchParams(window.location.search);
-    const school = params.get('school');
-    const service = params.get('service');
-    const view = params.get('view');
-    const admin = params.get('admin');
+    const checkAdminRoute = () => {
+      const hash = window.location.hash.toLowerCase();
+      const params = new URLSearchParams(window.location.search);
+      const school = params.get('school');
+      const service = params.get('service');
+      const view = params.get('view');
+      const admin = params.get('admin');
 
-    if (school) {
-      setSchoolCodeParam(school);
-      setCurrentView('schools');
-    } else if (service) {
-      setSelectedServiceId(service);
-      setCurrentView('catalog');
-    } else if (view === 'admin' || admin === 'true' || admin === 'secret') {
-      setCurrentView('admin');
-    } else if (view === 'pvccardmaker' || view === 'pvc' || view === 'cardmaker') {
-      setCurrentView('pvccardmaker');
-    } else if (view === 'attendanceposter' || view === 'attendance' || view === 'poster') {
-      setCurrentView('attendanceposter');
-    }
+      if (hash === '#admin' || hash === '#login' || hash === '#portal') {
+        setCurrentView('admin');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
 
-    // Ctrl + Shift + A shortcut to launch Admin Portal from anywhere
+      if (school) {
+        setSchoolCodeParam(school);
+        setCurrentView('schools');
+      } else if (service) {
+        setSelectedServiceId(service);
+        setCurrentView('catalog');
+      } else if (view === 'admin' || admin !== null) {
+        setCurrentView('admin');
+      } else if (view === 'pvccardmaker' || view === 'pvc' || view === 'cardmaker') {
+        setCurrentView('pvccardmaker');
+      } else if (view === 'attendanceposter' || view === 'attendance' || view === 'poster') {
+        setCurrentView('attendanceposter');
+      }
+    };
+
+    checkAdminRoute();
+
+    // Listen to hash changes (e.g. user types #admin in the URL bar)
+    window.addEventListener('hashchange', checkAdminRoute);
+
+    // Ctrl + Shift + A (or Cmd + Shift + A on Mac) shortcut to launch Admin Portal from anywhere
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.ctrlKey && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
         e.preventDefault();
         setCurrentView('admin');
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -57,7 +70,10 @@ export default function App() {
     };
 
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('hashchange', checkAdminRoute);
+    };
   }, []);
 
   const handleNavigate = (view: string, extraParam?: string) => {
