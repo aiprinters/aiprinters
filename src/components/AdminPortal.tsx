@@ -38,6 +38,8 @@ import {
   AlertCircle,
   Eye,
   Tag,
+  Camera,
+  User,
 } from 'lucide-react';
 
 interface AdminPortalProps {
@@ -126,6 +128,95 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onNavigateHome }) => {
 
   // Search in Schools
   const [schoolSearch, setSchoolSearch] = useState('');
+
+  // Student Photos state & error tracking
+  const [brokenPhotos, setBrokenPhotos] = useState<Record<string, boolean>>({});
+  const [photoUpdateMsg, setPhotoUpdateMsg] = useState<{ id: string; text: string } | null>(null);
+
+  const compressImageFile = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const maxDim = 600;
+          let width = img.width;
+          let height = img.height;
+          if (width > height) {
+            if (width > maxDim) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            }
+          } else {
+            if (height > maxDim) {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+          }
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            resolve(event.target?.result as string);
+            return;
+          }
+          ctx.drawImage(img, 0, 0, width, height);
+          resolve(canvas.toDataURL('image/jpeg', 0.88));
+        };
+        img.onerror = reject;
+        img.src = event.target?.result as string;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleAdminPhotoUpload = async (reqId: string, file: File) => {
+    try {
+      const compressedData = await compressImageFile(file);
+      await store.updateRequestPhoto(reqId, compressedData);
+      setRequests((prev) =>
+        prev.map((r) =>
+          r.id === reqId ? { ...r, photo_data: compressedData, photo_path: compressedData } : r
+        )
+      );
+      setBrokenPhotos((prev) => {
+        const copy = { ...prev };
+        delete copy[reqId];
+        return copy;
+      });
+      setPhotoUpdateMsg({ id: reqId, text: 'Photo updated' });
+      setTimeout(() => setPhotoUpdateMsg(null), 3000);
+    } catch (e) {
+      console.error('Error updating photo:', e);
+      alert('Could not update photograph. Please select a valid image file.');
+    }
+  };
+
+  const getStudentInitials = (name: string): string => {
+    if (!name) return 'ID';
+    const parts = name.trim().split(/\s+/).filter(Boolean);
+    if (parts.length === 0) return 'ID';
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    return (parts[0][0] + (parts[1] ? parts[1][0] : parts[0][1] || '')).toUpperCase();
+  };
+
+  const getStudentGradient = (name: string): string => {
+    const gradients = [
+      'from-blue-600 via-indigo-600 to-violet-700',
+      'from-emerald-600 via-teal-600 to-cyan-700',
+      'from-rose-500 via-pink-600 to-purple-600',
+      'from-amber-500 via-orange-600 to-red-600',
+      'from-violet-600 via-purple-600 to-indigo-700',
+      'from-sky-600 via-blue-600 to-indigo-700',
+    ];
+    let hash = 0;
+    for (let i = 0; i < (name || '').length; i++) {
+      hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    return gradients[Math.abs(hash) % gradients.length];
+  };
 
   useEffect(() => {
     // Check local stored session or pin
@@ -1187,20 +1278,69 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onNavigateHome }) => {
                             className="absolute top-4 right-4 rounded w-4 h-4 text-[#1f6fd6]"
                           />
 
-                          {/* Student Photo */}
-                          <div className="w-16 h-20 rounded-xl overflow-hidden bg-slate-100 border border-slate-200 shrink-0 flex items-center justify-center">
-                            {req.photo_data || req.photo_path ? (
-                              <img
-                                src={req.photo_data || req.photo_path}
-                                alt={req.student_name}
-                                className="w-full h-full object-cover"
-                              />
-                            ) : (
-                              <span className="text-[10px] text-slate-400 text-center px-1">
-                                No Photo
-                              </span>
-                            )}
-                          </div>
+                          {/* Student Photo with Stylish Fallback & Quick Upload */}
+                          {(() => {
+                            const photoSrc = req.photo_data || req.photo_path;
+                            const isUsable =
+                              photoSrc &&
+                              (photoSrc.startsWith('data:') ||
+                                photoSrc.startsWith('http://') ||
+                                photoSrc.startsWith('https://')) &&
+                              !brokenPhotos[req.id];
+
+                            return (
+                              <div className="relative group w-16 h-20 rounded-xl overflow-hidden shadow-xs border border-slate-200 shrink-0 bg-slate-100">
+                                {isUsable ? (
+                                  <img
+                                    src={photoSrc}
+                                    alt={req.student_name}
+                                    className="w-full h-full object-cover"
+                                    onError={() =>
+                                      setBrokenPhotos((prev) => ({ ...prev, [req.id]: true }))
+                                    }
+                                  />
+                                ) : (
+                                  <div
+                                    className={`w-full h-full bg-gradient-to-br ${getStudentGradient(
+                                      req.student_name
+                                    )} flex flex-col items-center justify-center p-1 text-white select-none relative`}
+                                  >
+                                    <span className="font-outfit font-black text-sm tracking-wider drop-shadow-xs">
+                                      {getStudentInitials(req.student_name)}
+                                    </span>
+                                    <div className="flex items-center gap-0.5 mt-0.5 opacity-85">
+                                      <User className="w-2.5 h-2.5" />
+                                      <span className="text-[8px] font-semibold uppercase tracking-tight">ID</span>
+                                    </div>
+                                  </div>
+                                )}
+
+                                {/* Hover action to upload or replace photo */}
+                                <label
+                                  className="absolute inset-0 bg-slate-900/70 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center text-white cursor-pointer transition-opacity text-[9px] font-bold text-center px-1 gap-0.5 backdrop-blur-[1px] z-10"
+                                  title="Upload or replace student photograph"
+                                >
+                                  <Camera className="w-4 h-4 text-white" />
+                                  <span>{isUsable ? 'Change' : 'Upload'}</span>
+                                  <input
+                                    type="file"
+                                    accept="image/*"
+                                    className="hidden"
+                                    onChange={(e) => {
+                                      const file = e.target.files?.[0];
+                                      if (file) handleAdminPhotoUpload(req.id, file);
+                                    }}
+                                  />
+                                </label>
+
+                                {photoUpdateMsg?.id === req.id && (
+                                  <div className="absolute inset-x-0 bottom-0 bg-emerald-600 text-white text-[8px] font-bold text-center py-0.5 z-20 animate-in fade-in">
+                                    Saved
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })()}
 
                           {/* Student Info */}
                           <div className="flex-1 min-w-0 pr-6 space-y-1">
@@ -1261,9 +1401,27 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onNavigateHome }) => {
                                 <option value="Delivered">Delivered</option>
                               </select>
 
-                              {req.photo_data && (
+                              {/* Upload/Replace Photo Action */}
+                              <label
+                                className="p-1 rounded text-slate-500 hover:text-[#1f6fd6] cursor-pointer inline-flex items-center gap-1 text-xs"
+                                title="Upload or replace student photo"
+                              >
+                                <Camera className="w-4 h-4" />
+                                <span className="text-[11px] hidden sm:inline">Photo</span>
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  className="hidden"
+                                  onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) handleAdminPhotoUpload(req.id, file);
+                                  }}
+                                />
+                              </label>
+
+                              {(req.photo_data || (req.photo_path && (req.photo_path.startsWith('data:') || req.photo_path.startsWith('http')))) && !brokenPhotos[req.id] && (
                                 <a
-                                  href={req.photo_data}
+                                  href={req.photo_data || req.photo_path}
                                   download={`Photo_${req.id}_${req.student_name.replace(/\s+/g, '_')}.png`}
                                   className="p-1 rounded text-slate-500 hover:text-[#1f6fd6]"
                                   title="Download Student Photo"

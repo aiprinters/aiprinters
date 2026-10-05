@@ -348,10 +348,25 @@ export const store = {
     try {
       const { data, error } = await supabase.from('id_card_requests').select('*, schools(name)').order('created_at', { ascending: false });
       if (!error && data && data.length > 0) {
-        const mapped = data.map((r: any) => ({
-          ...r,
-          school_name: r.schools?.name || 'School',
-        }));
+        // Merge with locally stored photo data if available
+        const localCached = getLocal<IdCardRequest[]>('ai_printers_requests', []);
+        const localPhotoMap = new Map<string, string>();
+        localCached.forEach((r) => {
+          if (r.photo_data) localPhotoMap.set(r.id, r.photo_data);
+        });
+
+        const mapped: IdCardRequest[] = data.map((r: any) => {
+          const photoData =
+            r.photo_data ||
+            localPhotoMap.get(r.id) ||
+            (typeof r.photo_path === 'string' && r.photo_path.startsWith('data:') ? r.photo_path : undefined);
+
+          return {
+            ...r,
+            school_name: r.schools?.name || r.school_name || 'School',
+            photo_data: photoData,
+          };
+        });
         setLocal('ai_printers_requests', mapped);
         return mapped;
       }
@@ -363,9 +378,12 @@ export const store = {
 
   async addRequest(req: Omit<IdCardRequest, 'id' | 'created_at'>): Promise<IdCardRequest> {
     const reqId = `AI-${1050 + Math.floor(Math.random() * 8900)}`;
+    const photoToSave = req.photo_data || req.photo_path || null;
     const newReq: IdCardRequest = {
       ...req,
       id: reqId,
+      photo_data: req.photo_data,
+      photo_path: photoToSave || undefined,
       created_at: new Date().toISOString(),
     };
 
@@ -376,7 +394,7 @@ export const store = {
         request_type: newReq.request_type,
         student_name: newReq.student_name,
         student_data: newReq.student_data,
-        photo_path: newReq.photo_path || null,
+        photo_path: photoToSave,
         notes: newReq.notes || null,
         status: newReq.status,
       });
@@ -388,6 +406,22 @@ export const store = {
     const updated = [newReq, ...current];
     setLocal('ai_printers_requests', updated);
     return newReq;
+  },
+
+  async updateRequestPhoto(id: string, photoDataUrl: string): Promise<void> {
+    try {
+      await supabase
+        .from('id_card_requests')
+        .update({ photo_path: photoDataUrl })
+        .eq('id', id);
+    } catch (e) {
+      console.warn('Supabase photo update error:', e);
+    }
+    const current = await this.getRequests();
+    const updated = current.map((r) =>
+      r.id === id ? { ...r, photo_data: photoDataUrl, photo_path: photoDataUrl } : r
+    );
+    setLocal('ai_printers_requests', updated);
   },
 
   async updateRequestStatus(id: string, status: RequestStatus): Promise<void> {

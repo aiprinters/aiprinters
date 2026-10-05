@@ -15,6 +15,7 @@ export const CatalogView: React.FC<CatalogViewProps> = ({
   const [service, setService] = useState<ServiceCategory | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [brokenImgs, setBrokenImgs] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     Promise.all([
@@ -124,11 +125,12 @@ export const CatalogView: React.FC<CatalogViewProps> = ({
                   <div>
                     {/* Image / Fallback Header */}
                     <div className="h-44 bg-slate-100 relative overflow-hidden flex items-center justify-center">
-                      {product.photo_url || product.photo_path ? (
+                      {(product.photo_url || product.photo_path) && !brokenImgs[product.id] ? (
                         <img
                           src={product.photo_url || product.photo_path}
                           alt={product.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          onError={() => setBrokenImgs((p) => ({ ...p, [product.id]: true }))}
                         />
                       ) : (
                         <div className="flex flex-col items-center justify-center text-slate-400 p-4 text-center">
