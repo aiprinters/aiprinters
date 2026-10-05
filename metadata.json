@@ -1,0 +1,8 @@
+{
+  "name": "Ai Printers - Print & Digital Services",
+  "description": "Complete digital storefront, ID card school portal, photo studio, custom product catalog, and admin management for Ai Printers.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

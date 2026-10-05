@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1180" width="1000" height="1180">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@800;900&amp;family=Syne:wght@800&amp;display=swap');
+      .sub-text {
+        font-family: 'Syne', 'Outfit', sans-serif;
+        font-weight: 800;
+        letter-spacing: 7px;
+        fill: #1e293b;
+      }
+      .brand-title {
+        font-family: 'Outfit', sans-serif;
+        font-weight: 900;
+      }
+    </style>
+    <mask id="innerAperture">
+      <rect x="0" y="0" width="1000" height="1000" fill="#ffffff" />
+      <polygon points="500,455 310,945 690,945" fill="#000000" />
+    </mask>
+  </defs>
+
+  <!-- CMYK Geometric Triangle "A" Mark with transparent cutout -->
+  <g mask="url(#innerAperture)">
+    <!-- Left Navy Leg of 'A' -->
+    <polygon
+      points="405,220 500,390 500,455 310,945 30,945"
+      fill="#0f172a"
+    />
+
+    <!-- Cyan Apex Diamond -->
+    <polygon
+      points="500,50 595,220 500,390 405,220"
+      fill="#009fe3"
+    />
+
+    <!-- Magenta Segment (Top Right) -->
+    <polygon
+      points="595,220 725,465 575,635 500,455 500,390"
+      fill="#e5007d"
+    />
+
+    <!-- Yellow Segment (Middle Right) -->
+    <polygon
+      points="725,465 855,705 705,875 575,635"
+      fill="#ffed00"
+    />
+
+    <!-- Black Segment (Bottom Right Foot) -->
+    <polygon
+      points="855,705 970,945 690,945 705,875"
+      fill="#0a0b0d"
+    />
+  </g>
+
+  <!-- Subtitle: AWESOME IMAGINATION -->
+  <g transform="translate(20, 1020)">
+    <text
+      x="0"
+      y="0"
+      font-size="52"
+      class="sub-text"
+      textLength="960"
+      lengthAdjust="spacingAndGlyphs"
+    >AWESOME IMAGINATION</text>
+  </g>
+
+  <!-- Wordmark: Ai PRINTERS -->
+  <g transform="translate(18, 1140)">
+    <text
+      x="0"
+      y="0"
+      font-size="118"
+      class="brand-title"
+      letter-spacing="-1px"
+    >
+      <tspan fill="#e5007d">Ai </tspan>
+      <tspan fill="#0f172a">PRINTERS</tspan>
+    </text>
+  </g>
+</svg>

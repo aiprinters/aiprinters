@@ -1,0 +1,6 @@
+{
+  "summary":  "Detailed implementation plan to eliminate left and bottom black border lines from Aadhaar Front and Back cards by insetting crop boundaries 4-6px inside printed border lines while preserving full HD clarity.",
+  "updatedAt":  "2026-10-04T17:50:03.243438614Z",
+  "requestFeedback":  true,
+  "userFacing":  true
+}

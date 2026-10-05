@@ -1,134 +1,21 @@
 <!doctype html>
-<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Ai Printers | Awesome Imagination</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
-<style>
-html{scroll-behavior:smooth}
-:root{--ink:#131c30;--muted:#5b6779;--line:#e8ecf2;--navy:#131c30;--blue:#1f6fd6;--cyan:#22b8e6;--magenta:#e6197f;--yellow:#f3b524;--bg:#fafbfd}
-*{box-sizing:border-box}body{margin:0;font-family:"DM Sans",sans-serif;color:var(--ink);background:var(--bg)}
-header{position:sticky;top:0;z-index:10;display:flex;align-items:center;justify-content:space-between;padding:14px 5%;flex-wrap:wrap;gap:14px;background:#fff;border-bottom:1px solid var(--line)}
-.brand{display:flex;align-items:center;gap:10px}.brand img{height:38px}.brand b{font:700 15px Outfit;display:block;color:var(--magenta);line-height:1.1}.brand span{font-size:9.5px;color:var(--muted);letter-spacing:.6px}
-.nav-wrap{display:flex;align-items:center;gap:22px}
-nav{display:flex;gap:24px}nav a{color:var(--ink);text-decoration:none;font-weight:600;font-size:13.5px}nav a:hover{color:var(--blue)}
-.icon-btn{border:1px solid var(--line);background:#fff;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;cursor:pointer;font-size:15px;color:var(--muted)}
-.search-box{display:none;position:absolute;right:5%;top:64px;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 12px 28px #16213b1a;padding:10px}
-.search-box.open{display:block}
-.search-box input{border:1px solid var(--line);border-radius:7px;padding:9px 12px;font:13px "DM Sans";width:220px}
-.wa-btn{background:#22c35e;color:#fff;padding:10px 18px;border-radius:24px;text-decoration:none;font:600 13px "DM Sans";display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
-.hero{max-width:1300px;margin:0 auto;padding:0 5% 20px}
-.hero-img{width:100%;border-radius:20px;box-shadow:0 20px 45px #13203015;margin-bottom:36px}
-.hero-text{text-align:center;max-width:700px;margin:auto}
-.pill{display:inline-block;color:var(--magenta);font:700 11px "DM Sans";letter-spacing:1.5px;margin-bottom:16px}
-.hero h1{font:800 40px/1.28 Outfit;margin:0 0 16px;color:var(--navy)}.hero h1 .c1{color:var(--blue)}.hero h1 .c2{color:var(--magenta)}
-.hero p{color:var(--muted);font-size:15px;line-height:1.7;max-width:460px;margin:0 0 28px}
-.cta{display:flex;gap:12px;flex-wrap:wrap}
-.btn{padding:13px 24px;border-radius:9px;font:600 14px "DM Sans";text-decoration:none;display:inline-block;border:0}
-.btn-primary{background:var(--navy);color:#fff;box-shadow:0 10px 22px #131c3025}
-.btn-wa{background:#22c35e;color:#fff}
-.hero-art{position:relative;aspect-ratio:1/1;border-radius:26px;background:linear-gradient(145deg,#eef4ff,#fdeaf3 60%,#fff9e8);display:grid;place-items:center;box-shadow:0 20px 45px #13203015}
-.hero-art .stack{display:grid;gap:10px;justify-items:center}
-.hero-art .row{display:flex;gap:14px;font-size:46px}
-.section{max-width:1200px;margin:40px auto;padding:0 5%}
-.section-head{margin-bottom:26px}
-.section-head .tag{color:var(--blue);font:700 11px "DM Sans";letter-spacing:1.5px}
-.section h2{font:700 26px Outfit;margin:6px 0 0;color:var(--navy)}
-.svc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:16px}
-.svc{background:#fff;border:1px solid var(--line);border-radius:14px;padding:22px 14px;text-align:center;text-decoration:none;color:var(--ink);box-shadow:0 4px 14px #13203008;transition:transform .15s,box-shadow .15s}
-.svc:hover{transform:translateY(-4px);box-shadow:0 14px 26px #13203014}
-.svc .ic{width:48px;height:48px;border-radius:12px;display:grid;place-items:center;font-size:22px;margin:0 auto 12px}
-.svc h4{font:600 13px "DM Sans";margin:0}
-.tools-box{background:#fff;border:1px solid var(--line);border-radius:18px;padding:34px;box-shadow:0 8px 24px #13203008}
-.tools-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px;margin-top:22px}
-.tool{border-radius:12px;padding:20px;background:#f7f8fc;border:1px solid var(--line);text-decoration:none;color:inherit;display:block}
-.tool h4{margin:0 0 5px;font:600 14px "DM Sans"}.tool p{margin:0;font-size:12px;color:var(--muted)}
-.tool.live{border-color:#c7dcff}
-.badge-tag{display:inline-block;font:700 9px "DM Sans";padding:3px 8px;border-radius:20px;margin-top:8px}
-.badge-live{background:#e3f7ec;color:#18905e}.badge-soon{background:#f1f2f5;color:#8a94a5}
-.features{background:#f3f6fc;padding:40px 5%}
-.features-grid{max-width:1200px;margin:auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:24px}
-.feature{display:flex;align-items:flex-start;gap:12px}
-.feature .fic{width:40px;height:40px;border-radius:10px;background:#fff;display:grid;place-items:center;font-size:18px;flex-shrink:0;box-shadow:0 4px 10px #13203010}
-.feature b{display:block;font-size:13.5px}.feature small{color:var(--muted);font-size:11.5px}
-footer{background:var(--navy);color:#aab3c9;padding:44px 5% 24px}
-.foot-grid{max-width:1200px;margin:auto;display:flex;justify-content:space-between;flex-wrap:wrap;gap:28px}
-footer a{color:#aab3c9;text-decoration:none;font-size:13px}
-.foot-links a{display:block;margin-bottom:8px}
-.foot-contact div{margin-bottom:8px;font-size:13px}
-.copyright{text-align:center;color:#6b7590;font-size:12px;margin-top:28px;border-top:1px solid #263050;padding-top:18px}
-@media(max-width:900px){nav{display:none}}
-</style></head>
-<body>
-<header>
-  <div class="brand"><img src="logo.png" alt="Ai Printers logo"><div><b>Ai Printers</b><span>AWESOME IMAGINATION</span></div></div>
-  <div class="nav-wrap">
-    <nav><a href="#home">Home</a><a href="#services">Services</a><a href="#tools">Customer Tools</a></nav>
-    <button class="icon-btn" id="searchToggle">🔍</button>
-    <a class="wa-btn" href="https://wa.me/917020655113" target="_blank">💬 WhatsApp Us</a>
-  </div>
-  <div class="search-box" id="searchBox"><input id="svcSearch" placeholder="Search services..."></div>
-</header>
-
-<section class="hero" id="home">
-  <img src="hero.png" alt="Ai Printers products" class="hero-img">
-  <div class="hero-text">
-    <span class="pill">PRINT · DESIGN · CREATE · CUSTOMISE</span>
-    <h1>Your <span class="c1">One-Stop Solution</span> for Printing & <span class="c2">Digital Services</span></h1>
-    <p style="margin-left:auto;margin-right:auto">High-quality printing, creative designs and customised products for schools, businesses and personal needs.</p>
-  </div>
-</section>
-
-<section class="section" id="services">
-  <div class="section-head"><span class="tag">WHAT WE OFFER</span><h2>Our Services</h2></div>
-  <div class="svc-grid" id="svcGrid"><p class="hint">Loading services…</p></div>
-</section>
-
-<section class="section" id="tools">
-  <div class="tools-box">
-    <span class="tag" style="color:var(--blue);font:700 11px DM Sans;letter-spacing:1.5px">CUSTOMER TOOLS</span>
-    <h2 style="margin:6px 0 0">Customer Tools</h2>
-    <div class="tools-grid">
-      <a href="/schools.html" class="tool live"><h4>🪪 ID Card Manager</h4><p>Create student & staff ID cards</p><span class="badge-tag badge-live">Live</span></a>
-      <div class="tool"><h4>📜 Certificate Maker</h4><p>Design certificates easily</p><span class="badge-tag badge-soon">Soon</span></div>
-      <div class="tool"><h4>🪪 Visiting Card Maker</h4><p>Create professional visiting cards</p><span class="badge-tag badge-soon">Soon</span></div>
-      <a href="photo-studio.html" class="tool live"><h4>🖼️ Photo Studio</h4><p>Straighten, adjust & change background</p><span class="badge-tag badge-live">Live</span></a>
-      <div class="tool"><h4>📁 PDF Tools</h4><p>Merge, compress, convert</p><span class="badge-tag badge-soon">Soon</span></div>
-    </div>
-  </div>
-</section>
-
-<div class="features">
-  <div class="features-grid">
-    <div class="feature"><div class="fic">✅</div><div><b>Quality Work</b><small>Premium quality output</small></div></div>
-    <div class="feature"><div class="fic">🚚</div><div><b>On-Time Delivery</b><small>Fast and reliable service</small></div></div>
-    <div class="feature"><div class="fic">⚙️</div><div><b>Custom Solutions</b><small>As per your requirements</small></div></div>
-    <div class="feature"><div class="fic">🏫</div><div><b>Schools & Businesses</b><small>Trusted by many institutions</small></div></div>
-    <div class="feature"><div class="fic">🎧</div><div><b>Customer Support</b><small>We are always here to help</small></div></div>
-  </div>
-</div>
-
-<footer>
-  <div class="foot-grid">
-    <div class="brand"><img src="logo.png" alt="" style="height:34px"><div><b style="color:#fff">Ai Printers</b><span style="color:#8791ac">Awesome Imagination</span></div></div>
-    <div class="foot-links"><a href="#home">Home</a><a href="#services">Services</a><a href="#tools">Customer Tools</a></div>
-    <div class="foot-contact">
-      <div>💬 +91 70206 55113</div>
-      <div>✉️ aiprintersanddigitalservices.23@gmail.com</div>
-      <div><a href="https://www.instagram.com/ai_printer" target="_blank">📸 Instagram</a></div>
-      <div><a href="https://whatsapp.com/channel/0029Va4x4EyKwqSN70mClX10" target="_blank">📢 WhatsApp Channel</a></div>
-    </div>
-  </div>
-  <div class="copyright">© 2026 Ai Printers — Awesome Imagination. All rights reserved.</div>
-</footer>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-const sb=window.supabase.createClient('https://yceukuehpffktbpengfx.supabase.co','sb_publishable_-8xFlxnjkipxyDihmKphzg_iTveTcqC');
-let servicesAll=[];
-async function loadServices(){let {data,error}=await sb.from('services').select('*').order('created_at');if(error||!data||!data.length){document.getElementById('svcGrid').innerHTML='<p class="hint">No services added yet.</p>';return}
-servicesAll=data;
-document.getElementById('svcGrid').innerHTML=data.map(s=>`<a class="svc" href="catalog.html?service=${s.id}"><div class="ic" style="background:#eef1fb;color:var(--blue)">${s.icon||'🖨️'}</div><h4>${s.name}</h4></a>`).join('');
-}
-loadServices();
-document.getElementById('searchToggle').onclick=()=>document.getElementById('searchBox').classList.toggle('open');
-document.getElementById('svcSearch').oninput=e=>{let q=e.target.value.toLowerCase();document.querySelectorAll('#svcGrid .svc').forEach(c=>{c.style.display=c.querySelector('h4').textContent.toLowerCase().includes(q)?'':'none'})};
-</script>
-</body></html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ai Printers | Awesome Imagination - Print & Digital Services</title>
+    <meta name="description" content="High-quality printing, creative designs and customised products for schools, businesses and personal needs by Ai Printers." />
+    <meta property="og:title" content="Ai Printers | Awesome Imagination - Print & Digital Services" />
+    <meta property="og:description" content="High-quality printing, creative designs and customised products for schools, businesses and personal needs by Ai Printers." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" type="image/svg+xml" href="/logo.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400..700;1,9..40,400..700&family=Outfit:wght@500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  </head>
+  <body class="bg-[#fafbfd] text-[#131c30] antialiased selection:bg-[#e6197f] selection:text-white">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
