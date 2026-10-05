@@ -1,8 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 import { School, IdCardRequest, ServiceCategory, Product, RequestStatus, CustomerOrder, CustomerUser, OrderStatus, CalculatorPricing } from './types';
 
-export const SUPABASE_URL = 'https://yceukuehpffktbpengfx.supabase.co';
-export const SUPABASE_ANON_KEY = 'sb_publishable_-8xFlxnjkipxyDihmKphzg_iTveTcqC';
+export const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://yceukuehpffktbpengfx.supabase.co';
+export const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || 'sb_publishable_-8xFlxnjkipxyDihmKphzg_iTveTcqC';
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
