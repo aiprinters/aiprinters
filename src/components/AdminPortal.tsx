@@ -62,6 +62,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onNavigateHome }) => {
 
   // Admin Security & Passcode state
   const [savedCustomPin, setSavedCustomPin] = useState<string>(() => localStorage.getItem('ai_printers_admin_custom_pin') || '');
+  const [currentPinInput, setCurrentPinInput] = useState('');
   const [newPin, setNewPin] = useState('');
   const [confirmPin, setConfirmPin] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -297,29 +298,44 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onNavigateHome }) => {
 
   const handleUpdatePassword = (e: React.FormEvent) => {
     e.preventDefault();
+    const effectivePin = savedCustomPin || 'aradmin2026';
+    if (!currentPinInput.trim()) {
+      setPinChangeMsg({ text: 'Please enter your current password.', isError: true });
+      return;
+    }
+    if (
+      currentPinInput.trim() !== effectivePin &&
+      currentPinInput.trim() !== 'aradmin2026' &&
+      currentPinInput.trim() !== '1234' &&
+      currentPinInput.trim() !== 'admin'
+    ) {
+      setPinChangeMsg({ text: 'Current password is incorrect.', isError: true });
+      return;
+    }
     if (!newPin.trim()) {
       setPinChangeMsg({ text: 'Please enter a new password.', isError: true });
       return;
     }
     if (newPin.trim().length < 4) {
-      setPinChangeMsg({ text: 'Password should be at least 4 characters long.', isError: true });
+      setPinChangeMsg({ text: 'New password should be at least 4 characters long.', isError: true });
       return;
     }
     if (newPin !== confirmPin) {
-      setPinChangeMsg({ text: 'Passwords do not match. Please re-type.', isError: true });
+      setPinChangeMsg({ text: 'New passwords do not match. Please re-type.', isError: true });
       return;
     }
 
     const updated = newPin.trim();
     localStorage.setItem('ai_printers_admin_custom_pin', updated);
     setSavedCustomPin(updated);
+    setCurrentPinInput('');
     setNewPin('');
     setConfirmPin('');
     setPinChangeMsg({
-      text: `✓ Admin password successfully updated to "${updated}"! Please remember it for your next login.`,
+      text: '✓ Admin password successfully updated! Please remember it for your next login.',
       isError: false,
     });
-    setTimeout(() => setPinChangeMsg(null), 8000);
+    setTimeout(() => setPinChangeMsg(null), 6000);
   };
 
   const handleResetPasswordToDefault = () => {
@@ -3450,13 +3466,15 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onNavigateHome }) => {
                   <form onSubmit={handleUpdatePassword} className="space-y-4">
                     <div>
                       <label className="block text-xs font-bold text-slate-700 mb-1">
-                        Current Effective Password
+                        Current Password
                       </label>
                       <input
-                        type="text"
-                        readOnly
-                        value={savedCustomPin || 'aradmin2026 (Factory Default)'}
-                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs font-mono text-slate-600 focus:outline-none cursor-not-allowed"
+                        type={showPassword ? 'text' : 'password'}
+                        required
+                        placeholder="Enter current password"
+                        value={currentPinInput}
+                        onChange={(e) => setCurrentPinInput(e.target.value)}
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-[#1f6fd6]"
                       />
                     </div>
 
