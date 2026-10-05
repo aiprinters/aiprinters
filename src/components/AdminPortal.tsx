@@ -8,7 +8,7 @@ import {
   FormField,
   CalculatorPricing,
 } from '../types';
-import { store, supabase, SUPABASE_URL, DEFAULT_CALCULATOR_PRICING } from '../supabase';
+import { store, supabase, SUPABASE_URL, DEFAULT_CALCULATOR_PRICING, getStudentPhotoUrl } from '../supabase';
 import { Logo } from './Logo';
 import {
   ShieldCheck,
@@ -38,8 +38,7 @@ import {
   AlertCircle,
   Eye,
   Tag,
-  Camera,
-  User,
+  X,
 } from 'lucide-react';
 
 interface AdminPortalProps {
@@ -129,94 +128,8 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onNavigateHome }) => {
   // Search in Schools
   const [schoolSearch, setSchoolSearch] = useState('');
 
-  // Student Photos state & error tracking
-  const [brokenPhotos, setBrokenPhotos] = useState<Record<string, boolean>>({});
-  const [photoUpdateMsg, setPhotoUpdateMsg] = useState<{ id: string; text: string } | null>(null);
-
-  const compressImageFile = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const img = new Image();
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          const maxDim = 600;
-          let width = img.width;
-          let height = img.height;
-          if (width > height) {
-            if (width > maxDim) {
-              height = Math.round((height * maxDim) / width);
-              width = maxDim;
-            }
-          } else {
-            if (height > maxDim) {
-              width = Math.round((width * maxDim) / height);
-              height = maxDim;
-            }
-          }
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext('2d');
-          if (!ctx) {
-            resolve(event.target?.result as string);
-            return;
-          }
-          ctx.drawImage(img, 0, 0, width, height);
-          resolve(canvas.toDataURL('image/jpeg', 0.88));
-        };
-        img.onerror = reject;
-        img.src = event.target?.result as string;
-      };
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-  };
-
-  const handleAdminPhotoUpload = async (reqId: string, file: File) => {
-    try {
-      const compressedData = await compressImageFile(file);
-      await store.updateRequestPhoto(reqId, compressedData);
-      setRequests((prev) =>
-        prev.map((r) =>
-          r.id === reqId ? { ...r, photo_data: compressedData, photo_path: compressedData } : r
-        )
-      );
-      setBrokenPhotos((prev) => {
-        const copy = { ...prev };
-        delete copy[reqId];
-        return copy;
-      });
-      setPhotoUpdateMsg({ id: reqId, text: 'Photo updated' });
-      setTimeout(() => setPhotoUpdateMsg(null), 3000);
-    } catch (e) {
-      console.error('Error updating photo:', e);
-      alert('Could not update photograph. Please select a valid image file.');
-    }
-  };
-
-  const getStudentInitials = (name: string): string => {
-    if (!name) return 'ID';
-    const parts = name.trim().split(/\s+/).filter(Boolean);
-    if (parts.length === 0) return 'ID';
-    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-    return (parts[0][0] + (parts[1] ? parts[1][0] : parts[0][1] || '')).toUpperCase();
-  };
-
-  const getStudentGradient = (name: string): string => {
-    const gradients = [
-      'from-blue-600 via-indigo-600 to-violet-700',
-      'from-emerald-600 via-teal-600 to-cyan-700',
-      'from-rose-500 via-pink-600 to-purple-600',
-      'from-amber-500 via-orange-600 to-red-600',
-      'from-violet-600 via-purple-600 to-indigo-700',
-      'from-sky-600 via-blue-600 to-indigo-700',
-    ];
-    let hash = 0;
-    for (let i = 0; i < (name || '').length; i++) {
-      hash = name.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    return gradients[Math.abs(hash) % gradients.length];
-  };
+  // Photo preview modal state
+  const [viewingPhoto, setViewingPhoto] = useState<{ url: string; name: string; id: string } | null>(null);
 
   useEffect(() => {
     // Check local stored session or pin
@@ -1278,65 +1191,31 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onNavigateHome }) => {
                             className="absolute top-4 right-4 rounded w-4 h-4 text-[#1f6fd6]"
                           />
 
-                          {/* Student Photo with Stylish Fallback & Quick Upload */}
+                          {/* Student Photo */}
                           {(() => {
-                            const photoSrc = req.photo_data || req.photo_path;
-                            const isUsable =
-                              photoSrc &&
-                              (photoSrc.startsWith('data:') ||
-                                photoSrc.startsWith('http://') ||
-                                photoSrc.startsWith('https://')) &&
-                              !brokenPhotos[req.id];
-
+                            const photoUrl = getStudentPhotoUrl(req.photo_data || req.photo_path);
                             return (
-                              <div className="relative group w-16 h-20 rounded-xl overflow-hidden shadow-xs border border-slate-200 shrink-0 bg-slate-100">
-                                {isUsable ? (
+                              <div
+                                onClick={() => {
+                                  if (photoUrl) {
+                                    setViewingPhoto({ url: photoUrl, name: req.student_name, id: req.id });
+                                  }
+                                }}
+                                className={`w-16 h-20 rounded-xl overflow-hidden bg-slate-100 border border-slate-200 shrink-0 flex items-center justify-center ${
+                                  photoUrl ? 'cursor-pointer hover:border-[#1f6fd6] transition-colors group' : ''
+                                }`}
+                                title={photoUrl ? 'Click to view photo' : 'No photo submitted'}
+                              >
+                                {photoUrl ? (
                                   <img
-                                    src={photoSrc}
+                                    src={photoUrl}
                                     alt={req.student_name}
-                                    className="w-full h-full object-cover"
-                                    onError={() =>
-                                      setBrokenPhotos((prev) => ({ ...prev, [req.id]: true }))
-                                    }
+                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                                   />
                                 ) : (
-                                  <div
-                                    className={`w-full h-full bg-gradient-to-br ${getStudentGradient(
-                                      req.student_name
-                                    )} flex flex-col items-center justify-center p-1 text-white select-none relative`}
-                                  >
-                                    <span className="font-outfit font-black text-sm tracking-wider drop-shadow-xs">
-                                      {getStudentInitials(req.student_name)}
-                                    </span>
-                                    <div className="flex items-center gap-0.5 mt-0.5 opacity-85">
-                                      <User className="w-2.5 h-2.5" />
-                                      <span className="text-[8px] font-semibold uppercase tracking-tight">ID</span>
-                                    </div>
-                                  </div>
-                                )}
-
-                                {/* Hover action to upload or replace photo */}
-                                <label
-                                  className="absolute inset-0 bg-slate-900/70 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center text-white cursor-pointer transition-opacity text-[9px] font-bold text-center px-1 gap-0.5 backdrop-blur-[1px] z-10"
-                                  title="Upload or replace student photograph"
-                                >
-                                  <Camera className="w-4 h-4 text-white" />
-                                  <span>{isUsable ? 'Change' : 'Upload'}</span>
-                                  <input
-                                    type="file"
-                                    accept="image/*"
-                                    className="hidden"
-                                    onChange={(e) => {
-                                      const file = e.target.files?.[0];
-                                      if (file) handleAdminPhotoUpload(req.id, file);
-                                    }}
-                                  />
-                                </label>
-
-                                {photoUpdateMsg?.id === req.id && (
-                                  <div className="absolute inset-x-0 bottom-0 bg-emerald-600 text-white text-[8px] font-bold text-center py-0.5 z-20 animate-in fade-in">
-                                    Saved
-                                  </div>
+                                  <span className="text-[10px] text-slate-400 text-center px-1 font-medium">
+                                    No Photo
+                                  </span>
                                 )}
                               </div>
                             );
@@ -1401,28 +1280,30 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onNavigateHome }) => {
                                 <option value="Delivered">Delivered</option>
                               </select>
 
-                              {/* Upload/Replace Photo Action */}
-                              <label
-                                className="p-1 rounded text-slate-500 hover:text-[#1f6fd6] cursor-pointer inline-flex items-center gap-1 text-xs"
-                                title="Upload or replace student photo"
-                              >
-                                <Camera className="w-4 h-4" />
-                                <span className="text-[11px] hidden sm:inline">Photo</span>
-                                <input
-                                  type="file"
-                                  accept="image/*"
-                                  className="hidden"
-                                  onChange={(e) => {
-                                    const file = e.target.files?.[0];
-                                    if (file) handleAdminPhotoUpload(req.id, file);
+                              {/* View full-size photo */}
+                              {(req.photo_data || req.photo_path) && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const photoUrl = getStudentPhotoUrl(req.photo_data || req.photo_path);
+                                    if (photoUrl) {
+                                      setViewingPhoto({ url: photoUrl, name: req.student_name, id: req.id });
+                                    }
                                   }}
-                                />
-                              </label>
+                                  className="p-1 rounded text-slate-500 hover:text-[#1f6fd6]"
+                                  title="View Student Photo"
+                                >
+                                  <Eye className="w-4 h-4" />
+                                </button>
+                              )}
 
-                              {(req.photo_data || (req.photo_path && (req.photo_path.startsWith('data:') || req.photo_path.startsWith('http')))) && !brokenPhotos[req.id] && (
+                              {/* Download student photo */}
+                              {(req.photo_data || req.photo_path) && (
                                 <a
-                                  href={req.photo_data || req.photo_path}
-                                  download={`Photo_${req.id}_${req.student_name.replace(/\s+/g, '_')}.png`}
+                                  href={getStudentPhotoUrl(req.photo_data || req.photo_path)}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  download={`Photo_${req.id}_${req.student_name.replace(/\s+/g, '_')}.jpg`}
                                   className="p-1 rounded text-slate-500 hover:text-[#1f6fd6]"
                                   title="Download Student Photo"
                                 >
@@ -3868,6 +3749,62 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onNavigateHome }) => {
                 className="px-5 py-2 rounded-xl bg-[#1f6fd6] text-white text-xs font-bold"
               >
                 Save Changes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Student Photo Preview Modal */}
+      {viewingPhoto && (
+        <div
+          className="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in"
+          onClick={() => setViewingPhoto(null)}
+        >
+          <div
+            className="bg-white rounded-3xl max-w-md w-full overflow-hidden shadow-2xl border border-slate-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-4 border-b border-slate-100 flex items-center justify-between">
+              <div>
+                <h4 className="font-outfit font-bold text-slate-900 text-sm">
+                  {viewingPhoto.name}
+                </h4>
+                <p className="text-[11px] font-mono text-slate-500">{viewingPhoto.id}</p>
+              </div>
+              <button
+                onClick={() => setViewingPhoto(null)}
+                className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-4 bg-slate-50 flex items-center justify-center min-h-[300px] max-h-[70vh] overflow-hidden">
+              <img
+                src={viewingPhoto.url}
+                alt={viewingPhoto.name}
+                className="max-h-[60vh] max-w-full rounded-xl object-contain shadow-md"
+              />
+            </div>
+
+            <div className="p-4 border-t border-slate-100 flex items-center justify-between gap-3 bg-white">
+              <a
+                href={viewingPhoto.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                download={`Photo_${viewingPhoto.id}_${viewingPhoto.name.replace(/\s+/g, '_')}.jpg`}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#1f6fd6] hover:bg-[#1a5cb3] text-white text-xs font-bold shadow-md transition-colors"
+              >
+                <Download className="w-4 h-4" />
+                <span>Download High-Res Photo</span>
+              </a>
+
+              <button
+                onClick={() => setViewingPhoto(null)}
+                className="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs font-semibold"
+              >
+                Close
               </button>
             </div>
           </div>

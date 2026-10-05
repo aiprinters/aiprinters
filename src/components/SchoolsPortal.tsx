@@ -159,14 +159,25 @@ export const SchoolsPortal: React.FC<SchoolsPortalProps> = ({
         'Class Teacher name': teacherName,
       };
 
+      const reqId =
+        typeof crypto !== 'undefined' && crypto.randomUUID
+          ? crypto.randomUUID()
+          : `AI-${1050 + Math.floor(Math.random() * 8900)}`;
+
+      let storagePath: string | undefined = undefined;
+      if (photoBlob) {
+        storagePath = await store.uploadStudentPhoto(photoBlob, reqId);
+      }
+
       const newReq = await store.addRequest({
+        id: reqId,
         school_id: selectedSchool.id,
         school_name: selectedSchool.name,
         request_type: requestType,
         student_name: studentName,
         student_data: fullStudentData,
+        photo_path: storagePath || photoDataUrl || undefined,
         photo_data: photoDataUrl || undefined,
-        photo_path: photoDataUrl || undefined,
         notes,
         status: 'Received',
       });

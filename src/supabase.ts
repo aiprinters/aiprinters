@@ -6,6 +6,21 @@ export const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || 'sb_p
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+export const getStudentPhotoUrl = (pathOrData?: string | null): string => {
+  if (!pathOrData) return '';
+  if (
+    pathOrData.startsWith('data:') ||
+    pathOrData.startsWith('http://') ||
+    pathOrData.startsWith('https://') ||
+    pathOrData.startsWith('blob:')
+  ) {
+    return pathOrData;
+  }
+  const cleanPath = pathOrData.replace(/^student-photos\//, '');
+  const { data } = supabase.storage.from('student-photos').getPublicUrl(cleanPath);
+  return data?.publicUrl || `${SUPABASE_URL}/storage/v1/object/public/student-photos/${cleanPath}`;
+};
+
 const defaultFields = [
   { label: 'Student name', type: 'text' as const, required: true },
   { label: 'Admission number', type: 'text' as const, required: true },
@@ -376,9 +391,32 @@ export const store = {
     return getLocal('ai_printers_requests', INITIAL_REQUESTS);
   },
 
-  async addRequest(req: Omit<IdCardRequest, 'id' | 'created_at'>): Promise<IdCardRequest> {
-    const reqId = `AI-${1050 + Math.floor(Math.random() * 8900)}`;
-    const photoToSave = req.photo_data || req.photo_path || null;
+  async uploadStudentPhoto(file: File | Blob, reqId: string): Promise<string> {
+    const ext = file.type === 'image/png' ? 'png' : 'jpg';
+    const fileName = `${reqId}.${ext}`;
+    try {
+      const { data, error } = await supabase.storage
+        .from('student-photos')
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: true,
+        });
+      if (!error && data?.path) {
+        return `student-photos/${data.path}`;
+      }
+    } catch (err) {
+      console.warn('Supabase storage upload warning:', err);
+    }
+    return `student-photos/${fileName}`;
+  },
+
+  async addRequest(req: Omit<IdCardRequest, 'id' | 'created_at'> & { id?: string }): Promise<IdCardRequest> {
+    const reqId =
+      req.id ||
+      (typeof crypto !== 'undefined' && crypto.randomUUID
+        ? crypto.randomUUID()
+        : `AI-${1050 + Math.floor(Math.random() * 8900)}`);
+    const photoToSave = req.photo_path || req.photo_data || null;
     const newReq: IdCardRequest = {
       ...req,
       id: reqId,
@@ -406,22 +444,6 @@ export const store = {
     const updated = [newReq, ...current];
     setLocal('ai_printers_requests', updated);
     return newReq;
-  },
-
-  async updateRequestPhoto(id: string, photoDataUrl: string): Promise<void> {
-    try {
-      await supabase
-        .from('id_card_requests')
-        .update({ photo_path: photoDataUrl })
-        .eq('id', id);
-    } catch (e) {
-      console.warn('Supabase photo update error:', e);
-    }
-    const current = await this.getRequests();
-    const updated = current.map((r) =>
-      r.id === id ? { ...r, photo_data: photoDataUrl, photo_path: photoDataUrl } : r
-    );
-    setLocal('ai_printers_requests', updated);
   },
 
   async updateRequestStatus(id: string, status: RequestStatus): Promise<void> {
